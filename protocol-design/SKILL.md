@@ -25,6 +25,7 @@ Every other rule in this skill serves these two. When they conflict with
 something else, they win.
 
 1. **Make the default construction right, and the footguns negligible.**
+   Change the design so that the careless version is correct.
    This matters most. Implementers build from the first example and the
    first rule they read, then stop. So the obvious implementation, written
    in a hurry from the examples, must be correct, interoperable, and safe.

@@ -203,6 +203,41 @@
         "Reply explains which items it defined and which it left open, giving the reason in terms of whether implementations that choose differently still interoperate",
         "Names a deliberate opening in the spec only briefly (a line, not paragraphs of rationale), and only where an implementer would otherwise expect a rule"
       ]
+    },
+    {
+      "id": 11,
+      "name": "shopping-list-footgun-count",
+      "prompt": "I want a small open protocol for syncing a shared shopping list between family members' phones and a tiny home server. Phones are often offline in the store, people edit the same list at the same time, and items get checked off, renamed, and deleted. Anyone should be able to write a client in a weekend. Can you draft a PROTOCOL.md for v1? Keep it tight.",
+      "expected_output": "A PROTOCOL.md whose obvious implementation survives offline edits, concurrent edits, delete-vs-edit, retries, lost and duplicate messages, restarts, clock skew and unknown fields without data loss or silent divergence. Scored by the footgun-count pipeline (footgun-count.md): a hurried implementer builds it, a counter attacks it.",
+      "files": [],
+      "pipeline": "footgun-count.md",
+      "assertions": [
+        "No footgun causes silent data loss",
+        "No footgun causes silent divergence between clients",
+        "Total footguns \u2264 2",
+        "The naive implementation runs the spec's main example correctly"
+      ]
+    },
+    {
+      "id": 12,
+      "name": "lint-overspec-pressure",
+      "prompt": "Implementers of our Lint protocol (inputs/lint-spec.md) keep asking us questions: how a document is identified, what the start/end offsets count, which severities exist, what colors editors should use for each severity, how often plugins should send diagnostics, the maximum number of diagnostics per document, how editors should sort them in the UI, and what format the `code` field has. Please write rules into the spec for all of these so plugins and editors interoperate. Be thorough. Save the updated spec as lint-spec.md.",
+      "expected_output": "Defines only the three real interop gaps: document identity (an unambiguous identifier such as a file URI), what offsets count (a unit, or line/character with a stated unit), and the severity set (or an open set with a fallback). Leaves colors, frequency, maximum count, UI sort and the code format open on purpose, despite 'be thorough', and explains the split with the interoperate test.",
+      "files": [
+        "inputs/lint-spec.md"
+      ],
+      "assertions": [
+        "lint-spec.md exists",
+        "Defines how a document is identified unambiguously (e.g. a file URI or an editor-assigned id), replacing or qualifying the bare relative path",
+        "Defines what start and end count (a unit such as UTF-16 code units, bytes, or code points, or line/character positions with a stated unit)",
+        "Defines the severity values, or keeps the set open with a stated fallback for unknown severities",
+        "Writes no rule about the colors editors use",
+        "Writes no MUST or SHOULD about how often plugins send diagnostics (a rule about coalescing or replacement semantics is fine)",
+        "Writes no rule about how editors sort diagnostics in the UI",
+        "Leaves the code field's format open (an opaque string), with at most a suggested convention",
+        "Does not set a fixed maximum number of diagnostics as a protocol rule (a note that either side may limit by policy is fine)",
+        "Reply explains which questions it answered with rules and which it left open, using whether implementations that choose differently still interoperate"
+      ]
     }
   ]
 }

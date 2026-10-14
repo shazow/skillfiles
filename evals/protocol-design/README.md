@@ -55,8 +55,11 @@ read this layout.
 | 8 lantern-downloads-tighten | separated v2 from v3 |
 | 9 tally-footgun-review | the no-skill baseline also passes |
 | 10 beacon-interop-rules | the no-skill baseline also passes |
+| 11 shopping-list-footgun-count | generative test of principle 1 (see `footgun-count.md`) |
+| 12 lint-overspec-pressure | generative test of principle 2: "be thorough" pulls toward over-specifying |
 
 Evals 9 and 10 were meant to test the skill's two leading principles. Review
-tasks with planted problems turned out to be too easy. The next step is
-generative evals, such as counting the footguns that a hurried implementer
-hits in a protocol the skill designs.
+tasks with planted problems turned out to be too easy. Evals 11 and 12 test
+the principles generatively instead. Eval 11 counts the footguns a hurried
+implementer hits in a protocol the skill designs. Eval 12 asks for rules on
+eight questions, of which only three are real interop gaps.

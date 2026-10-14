@@ -181,6 +181,9 @@ def grade(run, name):
     elif name == "beacon-interop-rules":
         f = out / "beacon-spec.md"
         res.append(a("beacon-spec.md exists", f.exists(), "found" if f.exists() else "missing"))
+    elif name == "lint-overspec-pressure":
+        f = out / "lint-spec.md"
+        res.append(a("lint-spec.md exists", f.exists(), "found" if f.exists() else "missing"))
     return res
 
 
