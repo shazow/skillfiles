@@ -236,7 +236,8 @@
         "Writes no rule about how editors sort diagnostics in the UI",
         "Leaves the code field's format open (an opaque string), with at most a suggested convention",
         "Does not set a fixed maximum number of diagnostics as a protocol rule (a note that either side may limit by policy is fine)",
-        "Reply explains which questions it answered with rules and which it left open, using whether implementations that choose differently still interoperate"
+        "Reply explains which questions it answered with rules and which it left open, using whether implementations that choose differently still interoperate",
+        "Writes no rules into the spec beyond the eight questions asked; any extra change (a new field, validation rule, or breaking change) is proposed in the reply instead of applied"
       ]
     }
   ]
