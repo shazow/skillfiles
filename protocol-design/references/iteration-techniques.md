@@ -126,6 +126,30 @@ Ask each question of a proposal. Each lens has caught real design bugs.
 
 Walk each through as a timeline with concrete IDs, not as prose.
 
+- **Hurried-implementer pass.** Run it on every new design before you hand
+  it over. Write the most obvious client and server from the spec and its
+  examples alone, with no defences the spec doesn't ask for, guessing the
+  obvious thing wherever it is silent. A few dozen lines of throwaway code
+  with an in-process transport is enough. Then run each scenario below
+  against it:
+  - offline edits by two clients, then reconnect;
+  - concurrent edits to the same item;
+  - delete versus a concurrent edit;
+  - a retry after a lost reply;
+  - a lost message in each direction;
+  - a duplicate delivery;
+  - reordered delivery;
+  - a client restart or reinstall;
+  - clock skew between clients;
+  - unknown fields from a newer peer;
+  - an empty, null, or missing field;
+  - very large input.
+
+  Any failure the naive code reaches by following the spec, or by the
+  obvious guess where the spec is silent, is a footgun. Fix it in the
+  construction, not with a warning, and rerun. Data loss and silent
+  divergence between clients must reach zero.
+
 - **Retries and deduplication:** a retried request whose broadcast is
   suppressed; a timed-out request that was applied anyway; a reply lost
   because the connection was replaced.

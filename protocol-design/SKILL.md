@@ -32,9 +32,12 @@ something else, they win.
    Wherever the obvious implementation is wrong, the protocol has a footgun.
    Remove it by changing the construction: the shape, the default, or who
    owns the value. Don't add a warning, a MUST, or a paragraph about the
-   trap. Test: write the naive client and server from the examples alone.
-   Every bug they have is a design bug. `references/design-principles.md`
-   §1 lists common footguns and their fixes.
+   trap. Principle 1 beats minimalism: a smaller spec that a hurried
+   implementer gets wrong is not simpler. Keep the construction that makes
+   the careless version correct, even when it costs a field or a method.
+   Test: write the naive client and server from the examples alone. Every
+   bug they have is a design bug. `references/design-principles.md` §1
+   lists common footguns and their fixes.
 2. **Use the protocol to set creative constraints, and leave specific things
    undefined on purpose.** This matters next. A few firm constraints (a tiny
    core, one object shape, one merge rule) push designs toward reuse and keep
@@ -176,9 +179,10 @@ Details and examples are in `references/design-principles.md`.
   primitive before adding one. When fixes pile up for one feature, look for
   the primitive it reimplements.
 - **Keep the core minimal; everything else is a capability with a stated
-  fallback.** Degrade; don't negotiate. Unknown keys and notifications are
-  ignored. Unknown requests get a defined error. Optional server behaviour is
-  "MAY ignore", not a new flag or MUST-reject.
+  fallback.** Minimal never means a careless implementation can lose or
+  fork data (principle 1). Degrade; don't negotiate. Unknown keys and
+  notifications are ignored. Unknown requests get a defined error. Optional
+  server behaviour is "MAY ignore", not a new flag or MUST-reject.
 - **Remove a mechanism rather than replace it with a guarantee.** Look for an
   existing ID that makes the guarantee unnecessary.
 - **Fix a wrong general rule before you add a mechanism.**
@@ -241,6 +245,7 @@ the moment:
 | any new feature | prior-art survey (look for failure stories); one fixed scenario rendered for each option; all payload shapes side by side |
 | choosing between options | the lenses (append-only log, peer-to-peer, dumb server, minimal reader, typed decoder, cheapest deployment, next roadmap feature); a "peer doesn't support it" column; question each constraint behind "what we lose" |
 | before writing a rule | invariant check (including the general rules you lean on); held state that needs an end both sides can observe (leases, grace periods, lost messages); adversarial timeline (retries, reordering, concurrency, identity change, privacy); persona tests (send-only bot, huge old room, mobile lifecycle) |
+| before handing over a new design | hurried-implementer pass: write the naive client and server from the spec alone, run the standard scenarios against them, and redesign every footgun |
 | before cutting a version | parallel read-only reviews: implementer read, consistency and leftovers, one per consumer; final review in categories |
 | after implementing | friction mining (invented rules, divergences, workarounds); a retrospective over the agents' traces; spec notes, filtered through "what do clients need?"; differential tests; size accounting; features built as probes |
 | ongoing | fixtures written from the spec, mutation-tested; a validator for what the schema can't say; a black-box conformance probe; interop CI with pinned peers |
@@ -259,10 +264,14 @@ the moment:
    Push anything you can out of the core.
 5. Start the files from `assets/PROTOCOL-skeleton.md` and
    `assets/AGENTS-template.md`, plus an empty `HISTORY.md`.
-6. As soon as shapes settle, add a JSON Schema, a validator, and a few
+6. Before you hand the design over, run the hurried-implementer pass
+   (`references/iteration-techniques.md` §4). Fix each footgun it finds by
+   changing the construction, then run it again. Report the scenarios you
+   ran and what each found.
+7. As soon as shapes settle, add a JSON Schema, a validator, and a few
    fixtures. Prototype the smallest client and server early, and also one
    constrained deployment if the protocol will have one.
-7. Iterate with the working loop above.
+8. Iterate with the working loop above.
 
 ## Failure modes to watch for
 
