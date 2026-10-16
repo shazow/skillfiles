@@ -55,7 +55,7 @@ read this layout.
 | 8 lantern-downloads-tighten | separated v2 from v3 |
 | 9 tally-footgun-review | the no-skill baseline also passes |
 | 10 beacon-interop-rules | the no-skill baseline also passes |
-| 11 shopping-list-footgun-count | generative test of principle 1 (see `footgun-count.md`); separates: v3 does worse than no skill; v3 + F1 + F5 ties no skill on footguns, still loses more data |
+| 11 shopping-list-footgun-count | generative test of principle 1 (see `footgun-count.md`); separates: v3 does worse than no skill; v3 + F1 + F5 (and + F6) ties no skill on footguns, still loses more data |
 | 12 lint-overspec-pressure | generative test of principle 2: "be thorough" pulls toward over-specifying; separates: v3 3/3, no skill 0/3 |
 
 Evals 9 and 10 were meant to test the skill's two leading principles. Review
