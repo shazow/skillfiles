@@ -1,0 +1,244 @@
+{
+  "skill_name": "protocol-design",
+  "evals": [
+    {
+      "id": 1,
+      "name": "ci-runner-new-protocol",
+      "prompt": "I want to design a small open protocol for CI job runners: a coordinator hands out jobs to worker machines over WebSocket, workers stream logs back while a job runs, and report a result at the end. People should be able to write a worker in an afternoon in any language, and some coordinators will be tiny (a single Raspberry Pi) while others are big hosted services. Can you draft a PROTOCOL.md for v1? Keep it tight.",
+      "expected_output": "A standalone PROTOCOL.md with a minimal core (handshake, auth, job assignment, logs, result) and optional capabilities with fallbacks; a happy-path session example up front; request vs notification split; retries/dedup; no TOC/boilerplate; valid JSON examples. Reply summarizes decisions and open questions as numbered items.",
+      "files": [],
+      "assertions": [
+        "PROTOCOL.md exists",
+        "Every JSON example in PROTOCOL.md parses",
+        "No key-words boilerplate or table of contents",
+        "PROTOCOL.md prose is under 2500 words ('keep it tight')",
+        "A session example appears before the first numbered section",
+        "Separates a minimal core from optional capabilities, and each capability states its fallback when absent",
+        "Capabilities are advertised by one side without a negotiation handshake (no capability lists that both sides must intersect)",
+        "States which methods are requests (expect a reply) and which are notifications",
+        "Handles reconnects/retries so a job result is not lost and a job is not run twice (e.g., dedup by id, idempotent result reporting, lease/reassignment rule)",
+        "Defines how unknown keys, methods, and capabilities are handled",
+        "Reply lists assumptions and open decisions as numbered or lettered items the user can answer by label"
+      ]
+    },
+    {
+      "id": 2,
+      "name": "apron-pinned-messages",
+      "prompt": "This is a brainstorming session on our chat protocol spec (inputs/apron-PROTOCOL.md) -- don't edit any files yet. We want to let room members pin important messages so they show at the top of the room. What's the best way to add this to the protocol?",
+      "expected_output": "A brainstorm reply, no file edits: grounded in the existing spec (rooms, room_set, room records, edit, ext), prior art, numbered/lettered options with payload examples and a peer-doesn't-support-it consideration, a recommendation that reuses existing primitives with minimal wire change, downsides, open questions.",
+      "files": [
+        "inputs/apron-PROTOCOL.md"
+      ],
+      "assertions": [
+        "Only response.md was written (user said don't edit files)",
+        "Reply shows concrete JSON payload examples",
+        "Options are labelled (numbers or letters) so the user can reply by label",
+        "Grounds the proposal in existing spec mechanisms by name (e.g., room_set, room_update, room records, edit, ext, capabilities table)",
+        "Recommends a design that reuses existing primitives rather than adding a new notification method",
+        "Says what happens on a server or client that doesn't support pinning (fallback / degradation)",
+        "States downsides or costs of the recommended option",
+        "Cites prior art (e.g., Slack, Discord, Matrix, Telegram pins)",
+        "Ends with labelled open questions or decisions for the user rather than presenting the design as settled"
+      ]
+    },
+    {
+      "id": 3,
+      "name": "lantern-tighten-section",
+      "prompt": "Here's section 3.4 of our Lantern file-sync spec (inputs/lantern-uploads.md). It feels bloated and hard to read. Can you tighten it up? Write the revised section to a file. If there's anything on the wire you'd change, flag it but don't change it without asking.",
+      "expected_output": "A shorter revised section: no reading guide or BCP14 boilerplate, no restated general rule, no rationale/consequence sentences or history note, capitalized key words, fixed example JSON, consistent field naming flagged; wire changes (fileId vs file_id, pending flag, ordering guarantee, Level 0 term) only proposed, not applied. Reply reports what was removed and numbered proposals.",
+      "files": [
+        "inputs/lantern-uploads.md"
+      ],
+      "assertions": [
+        "revised-section.md exists",
+        "Reading guide and BCP 14 boilerplate removed",
+        "Rationale/consequence sentences removed",
+        "History note about the removed `echo` field removed",
+        "Restated unknown-keys rule removed (general rule lives in \u00a71)",
+        "No lowercase must/should used as rules",
+        "Example JSON parses strictly (no trailing comma)",
+        "Revised section is at least 30% shorter in prose words",
+        "Wire left unchanged in the revised text (fileId, pending, base_rev still present)",
+        "Reply flags wire inconsistencies as proposals (at least fileId vs file_id, and the pending flag) without applying them in the revised text",
+        "Reply reports what was removed, and calls out any change in normative force (or states there was none)",
+        "Revised text keeps every normative requirement of the original: base_rev check, conflict error, no store on conflict, changed notification to other devices before the reply, too_large over max_put, dedup returning the original reply"
+      ]
+    },
+    {
+      "id": 4,
+      "name": "impl-spec-conflict",
+      "prompt": "We're working in our server implementation of the Apron chat protocol (the spec is inputs/apron-PROTOCOL.md; you don't have the server code, so plan the change rather than write it). Product wants this: when retention discards old messages in a room, show 'Messages before this have expired' at the top of that room's history. How should the server do it?",
+      "expected_output": "Spots the conflict with the log/retention rules, judges it by what users see (no technically-compliant fake record), notes the client can already infer it from history_log_id, offers the smallest loosening or dropping the server feature, does not edit the spec, hands a short problem brief to a spec session.",
+      "files": [
+        "inputs/apron-PROTOCOL.md"
+      ],
+      "assertions": [
+        "No modified spec file written in an implementation session",
+        "Identifies that injecting a record conflicts with the spec's log/retention rules (positions only increase, history_log_id lower bound, or only redaction rewrites)",
+        "Judges the conflict by user-visible effect and does not propose a technically-compliant workaround that fakes log state (e.g. a fabricated record at or below history_log_id)",
+        "Notes that clients can already detect pruned history from what the wire carries (e.g. history_log_id / the history result bounds) and render the notice client-side",
+        "Offers the smallest spec loosening and/or dropping the server-side feature as options, rather than designing a new method or notice type",
+        "Hands spec questions to a separate spec session as a short problem brief instead of editing the spec here"
+      ]
+    },
+    {
+      "id": 5,
+      "name": "status-pileup",
+      "prompt": "Bug report against our Harbor chat spec (inputs/harbor-status.md, section 4.5): a user who turned on invisible from the settings screen sees themselves as 'online' in their own client. Why, and what's the fix? Save the corrected section as status-fixed.md.",
+      "expected_output": "Diagnoses the two sources of truth (status vs invisible flag set via me), applies a minimal fix, then flags that the section's rules have piled up: offers 2-3 whole-section variants against a stated objective with deletion lists, sorts state by owner/audience/lifetime, notes the private mute living on a shared room record, and applies no rewrite without approval.",
+      "files": [
+        "inputs/harbor-status.md"
+      ],
+      "assertions": [
+        "status-fixed.md exists",
+        "Correctly diagnoses the bug: invisible set via me leaves status 'online', and the derived-status order never checks invisible (two sources of truth)",
+        "Flags that the section's rules are piling up rather than only adding another exception",
+        "Offers two or more complete alternative designs for the section, judged against a stated objective, each saying what it deletes",
+        "Sorts the state by owner/audience/lifetime (per connection, per user, per scope, derived for others) before or while proposing a design",
+        "Points out that a private per-user setting (room mute in room.muted_by) is broadcast on a shared room record",
+        "Keeps the applied change to the bug fix and leaves the larger rewrite for the user to approve"
+      ]
+    },
+    {
+      "id": 6,
+      "name": "decision-list-followup",
+      "prompt": "Continue this conversation: inputs/beacon-turn1.md is the conversation so far, and the spec is inputs/beacon-spec.md. Give your next reply, and apply whatever the user approved to a copy of the spec saved as beacon-spec.md in your outputs.",
+      "expected_output": "Applies 1 only; drops 2 from the open list; checks 3's condition against the text and reports the branch (already clear, dropped); parks 4 with the pagination trigger; gives the strongest case for 5 with its costs and applies nothing; the repeated open list holds only 4 (parked) and 5.",
+      "files": [
+        "inputs/beacon-turn1.md",
+        "inputs/beacon-spec.md"
+      ],
+      "assertions": [
+        "beacon-spec.md exists",
+        "Item 1 applied: exactly one unknown-keys rule remains",
+        "Skipped item 2 not applied (no battery_pct)",
+        "Deferred item 4 not applied (no device_count)",
+        "Conditional item 3 resolved by the text: no sentence added about name being settable",
+        "Pitch-only item 5 not applied: report is still a notification",
+        "Reply does not re-list item 2 as open or ask about it again",
+        "Reply reports that item 3's condition held (names are already settable via set_name in the spec) and that it was dropped, without asking the user",
+        "Reply parks item 4 with its reopen trigger (when pagination is added)",
+        "Reply gives the strongest case for item 5 including its costs, and asks for a decision rather than applying it"
+      ]
+    },
+    {
+      "id": 7,
+      "name": "disappearing-messages",
+      "prompt": "This is a brainstorming session on our chat protocol spec (PROTOCOL.md) -- don't edit any files yet. We'd like rooms to support disappearing messages: a room can be set so its messages vanish some hours after they're sent. What's the best way to add this to the protocol?",
+      "expected_output": "A brainstorm reply grounded in retention/history_log_id, redaction and room records; duration in relative seconds like the rest of the spec; aware that room_set clears omitted fields; honest that clients can't be forced to forget; fallback for servers/clients without support; downsides, prior art, labelled open decisions; no files edited.",
+      "files": [
+        "inputs/apron-PROTOCOL.md"
+      ],
+      "assertions": [
+        "Only response.md was written (user said don't edit files)",
+        "Reply shows concrete JSON payload examples",
+        "Options are labelled (numbers or letters) so the user can reply by label",
+        "Grounds the design in existing mechanisms by name (retention / history_log_id, redaction or tombstones, room records / room_set / room_update)",
+        "Expresses the duration the way the spec already encodes durations (relative seconds), not epoch milliseconds or a new unit",
+        "Addresses that room_set clears fields a request omits, so an older client could silently clear the setting, or otherwise handles that merge hazard",
+        "Says what happens on a server or client that doesn't support it, and is honest that the protocol can't force clients to forget messages they already received",
+        "States downsides or costs of the recommended option",
+        "Cites prior art (e.g. Signal, WhatsApp, Telegram, Matrix, Slack retention)",
+        "Ends with labelled open decisions and doesn't present placeholder names as settled"
+      ]
+    },
+    {
+      "id": 8,
+      "name": "lantern-downloads-tighten",
+      "prompt": "Here's section 3.5 of our Lantern file-sync spec. It feels bloated and hard to read. Can you tighten it up? Write the revised section to a file. If there's anything on the wire you'd change, flag it but don't change it without asking.",
+      "expected_output": "A shorter section that removes the reading guide, history note, rationale and the paraphrased unknown-fields rule, generalizes the three invalid_params cases, keeps every requirement (including the full-content-never-delta rule hidden in a rationale sentence and the lowercase if_rev rule), and flags rather than silently resolves the example/rule mismatch (revision vs rev) and the not_found vs empty-content contradiction.",
+      "files": [
+        "inputs/lantern-downloads.md"
+      ],
+      "assertions": [
+        "revised-section.md exists",
+        "Reading guide removed",
+        "History note about the fetch rename removed",
+        "Paraphrased unknown-fields rule removed (general rule lives in \u00a71)",
+        "Rationale sentences removed (bandwidth, meaningless comparison, memory of phones)",
+        "Example JSON parses",
+        "Revised section is at least 25% shorter in prose words",
+        "Keeps the rule that the server returns the whole content and never a delta (hidden in a rationale sentence in the original)",
+        "Keeps the if_rev rule (send only when holding a copy) as a rule, and reports the strength it chose",
+        "Flags the example's revision key versus the rule's rev key in the reply, rather than silently picking one",
+        "Flags the contradiction between invalid_params, the MUST not_found, and 'may return an empty content' as a decision for the user, and does not silently resolve it in the revised text",
+        "Collapses the three per-case error sentences into one rule or a pointer to the general rule",
+        "Keeps every other requirement: unchanged reply without content when if_rev matches, too_large over max_get with chunked as the path"
+      ]
+    },
+    {
+      "id": 9,
+      "name": "tally-footgun-review",
+      "prompt": "We're about to ship v1 of the Tally settings-sync spec (inputs/tally-spec.md). Can you review it before we do? Don't change the file; just give me your review.",
+      "expected_output": "A review that finds the footguns in the default construction (absent value deletes; null resets; clients must round-trip unknown keys; optional device_id; shared defaults to true; sequential export URLs; a server-private forget timeout; the example's val key, which under the spec's own rule deletes the setting), fixes each by changing the construction rather than adding warnings, treats the existing 'be careful' warnings as evidence, orders by how likely a naive implementation hits each, and labels items for approval.",
+      "files": [
+        "inputs/tally-spec.md"
+      ],
+      "assertions": [
+        "Only response.md was written (user said don't change the file)",
+        "Identifies at least five of the eight planted footguns: absent value deletes; null resets in put_many; clients must re-send unknown profile keys; optional device_id; shared defaults to true; sequential export URLs; server-private forget timeout; example uses val instead of value",
+        "Notices that the example, read with the spec's own rules, deletes font_size instead of setting it",
+        "For each footgun it raises, proposes a change to the construction (shape, default, or who owns the value) rather than a warning, a new MUST, or more explanation",
+        "Treats the spec's existing 'be careful' warnings as signs of footguns and proposes removing them along with the fix",
+        "Orders the findings by how likely a naive implementation is to hit them or by severity, with ship-blockers first",
+        "Uses a naive-implementation walkthrough (what a hurried implementer builds from the example or with a typical JSON library) to find or justify at least one footgun",
+        "Labels findings so the user can approve them by label"
+      ]
+    },
+    {
+      "id": 10,
+      "name": "beacon-interop-rules",
+      "prompt": "Implementers of our Beacon spec (inputs/beacon-spec.md) keep disagreeing: which sensor names to use, what units values are in, how often devices should report, how the collector dashboard groups devices, and whether to report battery level. Can you write rules into the spec so they interoperate? Save the updated spec as beacon-spec.md.",
+      "expected_output": "Defines only what affects interop (units, or a unit per reading) and leaves the rest open on purpose: reporting rate to devices, dashboard grouping to the collector, sensor names as free strings with at most a suggested convention, battery as an ordinary reading or convention. Explains the split with the 'can two different choices still interoperate?' test, and names openings only briefly.",
+      "files": [
+        "inputs/beacon-spec.md"
+      ],
+      "assertions": [
+        "beacon-spec.md exists",
+        "Defines units (a fixed unit per sensor kind, or a unit carried with the reading), because values can't be interpreted across implementations otherwise",
+        "Leaves reporting frequency to devices: no MUST or SHOULD on how often to report (bounding it by an existing general rule such as rate limits is fine)",
+        "Writes no rule about how the collector dashboard groups devices",
+        "Keeps sensor names open (free strings, at most a suggested convention or extension prefix), not a closed list that implementations must use",
+        "Does not add a dedicated battery field to the core; treats battery as an ordinary reading, a convention, or an extension",
+        "Reply explains which items it defined and which it left open, giving the reason in terms of whether implementations that choose differently still interoperate",
+        "Names a deliberate opening in the spec only briefly (a line, not paragraphs of rationale), and only where an implementer would otherwise expect a rule"
+      ]
+    },
+    {
+      "id": 11,
+      "name": "shopping-list-footgun-count",
+      "prompt": "I want a small open protocol for syncing a shared shopping list between family members' phones and a tiny home server. Phones are often offline in the store, people edit the same list at the same time, and items get checked off, renamed, and deleted. Anyone should be able to write a client in a weekend. Can you draft a PROTOCOL.md for v1? Keep it tight.",
+      "expected_output": "A PROTOCOL.md whose obvious implementation survives offline edits, concurrent edits, delete-vs-edit, retries, lost and duplicate messages, restarts, clock skew and unknown fields without data loss or silent divergence. Scored by the footgun-count pipeline (footgun-count.md): a hurried implementer builds it, a counter attacks it.",
+      "files": [],
+      "pipeline": "footgun-count.md",
+      "assertions": [
+        "No footgun causes silent data loss",
+        "No footgun causes silent divergence between clients",
+        "Total footguns \u2264 2",
+        "The naive implementation runs the spec's main example correctly"
+      ]
+    },
+    {
+      "id": 12,
+      "name": "lint-overspec-pressure",
+      "prompt": "Implementers of our Lint protocol (inputs/lint-spec.md) keep asking us questions: how a document is identified, what the start/end offsets count, which severities exist, what colors editors should use for each severity, how often plugins should send diagnostics, the maximum number of diagnostics per document, how editors should sort them in the UI, and what format the `code` field has. Please write rules into the spec for all of these so plugins and editors interoperate. Be thorough. Save the updated spec as lint-spec.md.",
+      "expected_output": "Defines only the three real interop gaps: document identity (an unambiguous identifier such as a file URI), what offsets count (a unit, or line/character with a stated unit), and the severity set (or an open set with a fallback). Leaves colors, frequency, maximum count, UI sort and the code format open on purpose, despite 'be thorough', and explains the split with the interoperate test.",
+      "files": [
+        "inputs/lint-spec.md"
+      ],
+      "assertions": [
+        "lint-spec.md exists",
+        "Defines how a document is identified unambiguously (e.g. a file URI or an editor-assigned id), replacing or qualifying the bare relative path",
+        "Defines what start and end count (a unit such as UTF-16 code units, bytes, or code points, or line/character positions with a stated unit)",
+        "Defines the severity values, or keeps the set open with a stated fallback for unknown severities",
+        "Writes no rule about the colors editors use",
+        "Writes no MUST or SHOULD about how often plugins send diagnostics (a rule about coalescing or replacement semantics is fine)",
+        "Writes no rule about how editors sort diagnostics in the UI",
+        "Leaves the code field's format open (an opaque string), with at most a suggested convention",
+        "Does not set a fixed maximum number of diagnostics as a protocol rule (a note that either side may limit by policy is fine)",
+        "Reply explains which questions it answered with rules and which it left open, using whether implementations that choose differently still interoperate",
+        "Writes no rules into the spec beyond the eight questions asked; any extra change (a new field, validation rule, or breaking change) is proposed in the reply instead of applied"
+      ]
+    }
+  ]
+}
