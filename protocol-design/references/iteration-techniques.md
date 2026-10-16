@@ -143,7 +143,13 @@ Walk each through as a timeline with concrete IDs, not as prose.
   - clock skew between clients;
   - unknown fields from a newer peer;
   - an empty, null, or missing field;
-  - very large input.
+  - a malformed request: a wrong type, a null where a list belongs, one bad
+    item inside an otherwise valid batch;
+  - oversized input. First decide, from what this protocol carries, which
+    sizes are reasonable and which are excessive. A protocol for large files
+    and a protocol for shopping lists draw the line in different places.
+    Then send both, including a request that a server or proxy refuses for
+    its size, and follow what each side does next.
 
   Any failure the naive code reaches by following the spec, or by the
   obvious guess where the spec is silent, is a footgun. Fix it in the
