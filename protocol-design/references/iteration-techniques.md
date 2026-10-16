@@ -145,11 +145,13 @@ Walk each through as a timeline with concrete IDs, not as prose.
   - an empty, null, or missing field;
   - a malformed request: a wrong type, a null where a list belongs, one bad
     item inside an otherwise valid batch;
-  - oversized input. First decide, from what this protocol carries, which
-    sizes are reasonable and which are excessive. A protocol for large files
-    and a protocol for shopping lists draw the line in different places.
-    Then send both, including a request that a server or proxy refuses for
-    its size, and follow what each side does next.
+  - inappropriately sized input. First define the realistic range for each
+    size this protocol carries: payloads, batches, lists, counts, and
+    durations. A protocol for large files and a protocol for shopping lists
+    draw it in different places. Then test past both ends: too small (zero,
+    one, a truncated frame, a chunk so small it multiplies round trips) and
+    too large (including a request that a server or proxy refuses for its
+    size). Follow what each side does next.
 
   Any failure the naive code reaches by following the spec, or by the
   obvious guess where the spec is silent, is a footgun. Fix it in the
